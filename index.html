@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minhas Tarefas</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #111827;
+      --primary-hover: #000000;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --shadow: 0 10px 30px rgba(0,0,0,.06);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 40px 18px 80px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(28px, 5vw, 42px);
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 0 0 28px;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .add-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 15px;
+      font-size: 16px;
+      outline: none;
+      transition: .2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 4px rgba(17,24,39,.05);
+    }
+
+    select {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 14px;
+      background: white;
+      color: var(--text);
+      outline: none;
+      cursor: pointer;
+    }
+
+    select:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 4px rgba(17,24,39,.05);
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: .2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover { background: var(--primary-hover); }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .task {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .task:last-child { border-bottom: 0; }
+
+    .task input[type="checkbox"] {
+      margin-top: 3px;
+      width: 19px;
+      height: 19px;
+      cursor: pointer;
+      accent-color: var(--success);
+    }
+
+    .task-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-text {
+      display: block;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .task-date {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .priority {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 7px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .priority-alta {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .priority-media {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .priority-baixa {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .completed .task-text {
+      text-decoration: line-through;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .icon-btn {
+      padding: 7px 10px;
+      background: #f3f4f6;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .icon-btn:hover { background: #e5e7eb; }
+
+    .delete-btn {
+      color: var(--danger);
+    }
+
+    .edit-row {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .edit-row input {
+      flex: 1;
+      min-width: 0;
+      padding: 9px 10px;
+      font-size: 14px;
+    }
+
+    .save-btn {
+      background: var(--primary);
+      color: white;
+    }
+
+    .cancel-btn {
+      background: #f3f4f6;
+      color: var(--text);
+    }
+
+    .clear-btn.confirming {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 24px 10px 16px;
+      font-size: 14px;
+    }
+
+    .history-header {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-toggle {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .history-content.hidden {
+      display: none;
+    }
+
+    .clear-btn {
+      background: transparent;
+      color: var(--danger);
+      padding: 7px 0;
+      font-size: 12px;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 560px) {
+      .container { padding-top: 24px; }
+      .add-row { flex-direction: column; }
+      select { min-height: 46px; }
+      .btn-primary { width: 100%; }
+      .task { align-items: flex-start; }
+      .actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Minhas Tarefas</h1>
+    <p class="subtitle">Anote o que precisa fazer e marque quando concluir.</p>
+
+    <section class="card">
+      <form id="taskForm" class="add-row">
+        <input
+          id="taskInput"
+          type="text"
+          placeholder="Ex.: terminar apresentação da faculdade"
+          autocomplete="off"
+          maxlength="250"
+          required
+        />
+        <select id="priorityInput" aria-label="Prioridade">
+          <option value="alta">Prioridade alta</option>
+          <option value="media">Prioridade média</option>
+          <option value="baixa">Prioridade baixa</option>
+        </select>
+        <button class="btn-primary" type="submit">Adicionar</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <h2>Para fazer</h2>
+        <span id="pendingCount" class="count"></span>
+      </div>
+      <ul id="pendingList" class="task-list"></ul>
+      <div id="pendingEmpty" class="empty">Nenhuma tarefa pendente 🎉</div>
+    </section>
+
+    <section class="card">
+      <div class="section-title history-header" id="historyHeader">
+        <h2>Histórico</h2>
+        <span id="historyToggle" class="history-toggle">Ocultar</span>
+      </div>
+
+      <div id="historyContent" class="history-content">
+        <ul id="completedList" class="task-list"></ul>
+        <div id="completedEmpty" class="empty">Você ainda não concluiu nenhuma tarefa.</div>
+        <button id="clearCompleted" class="clear-btn" type="button">Limpar histórico</button>
+      </div>
+    </section>
+
+    <div class="footer-note">
+      As tarefas ficam salvas neste navegador automaticamente.
+    </div>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "minhas_tarefas_v1";
+
+    let tasks = loadTasks();
+
+    const taskForm = document.getElementById("taskForm");
+    const taskInput = document.getElementById("taskInput");
+    const priorityInput = document.getElementById("priorityInput");
+    const pendingList = document.getElementById("pendingList");
+    const completedList = document.getElementById("completedList");
+    const pendingEmpty = document.getElementById("pendingEmpty");
+    const completedEmpty = document.getElementById("completedEmpty");
+    const pendingCount = document.getElementById("pendingCount");
+    const clearCompleted = document.getElementById("clearCompleted");
+    const historyHeader = document.getElementById("historyHeader");
+    const historyContent = document.getElementById("historyContent");
+    const historyToggle = document.getElementById("historyToggle");
+
+    function loadTasks() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTasks() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    function formatDate(timestamp) {
+      return new Intl.DateTimeFormat("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short"
+      }).format(new Date(timestamp));
+    }
+
+    function createTaskElement(task) {
+      const li = document.createElement("li");
+      li.className = "task" + (task.completed ? " completed" : "");
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = task.completed;
+      checkbox.title = task.completed ? "Marcar como pendente" : "Marcar como concluída";
+      checkbox.addEventListener("change", () => toggleTask(task.id));
+
+      const main = document.createElement("div");
+      main.className = "task-main";
+
+      const text = document.createElement("span");
+      text.className = "task-text";
+      text.textContent = task.text;
+
+      const date = document.createElement("div");
+      date.className = "task-date";
+      date.textContent = task.completed
+        ? "Concluída em " + formatDate(task.completedAt)
+        : "Criada em " + formatDate(task.createdAt);
+
+      const priority = document.createElement("span");
+      const priorityValue = task.priority || "media";
+      priority.className = "priority priority-" + priorityValue;
+      priority.textContent =
+        priorityValue === "alta" ? "Prioridade alta" :
+        priorityValue === "baixa" ? "Prioridade baixa" :
+        "Prioridade média";
+
+      main.appendChild(text);
+      main.appendChild(date);
+      main.appendChild(priority);
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "icon-btn";
+      edit.textContent = "Editar";
+      edit.addEventListener("click", () => startInlineEdit(task.id, main, actions));
+      actions.appendChild(edit);
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "icon-btn delete-btn";
+      del.textContent = "Excluir";
+      del.addEventListener("click", () => deleteTask(task.id));
+      actions.appendChild(del);
+
+      li.appendChild(checkbox);
+      li.appendChild(main);
+      li.appendChild(actions);
+
+      return li;
+    }
+
+    function render() {
+      pendingList.innerHTML = "";
+      completedList.innerHTML = "";
+
+      const priorityOrder = { alta: 0, media: 1, baixa: 2 };
+
+      const pending = tasks
+        .filter(t => !t.completed)
+        .sort((a, b) => {
+          const pa = priorityOrder[a.priority || "media"];
+          const pb = priorityOrder[b.priority || "media"];
+          if (pa !== pb) return pa - pb;
+          return b.createdAt - a.createdAt;
+        });
+
+      const completed = tasks
+        .filter(t => t.completed)
+        .sort((a, b) => b.completedAt - a.completedAt);
+
+      pending.forEach(task => pendingList.appendChild(createTaskElement(task)));
+      completed.forEach(task => completedList.appendChild(createTaskElement(task)));
+
+      pendingEmpty.style.display = pending.length ? "none" : "block";
+      completedEmpty.style.display = completed.length ? "none" : "block";
+      clearCompleted.style.display = completed.length ? "inline-block" : "none";
+      if (!completed.length) {
+        clearCompleted.textContent = "Limpar histórico";
+        clearCompleted.classList.remove("confirming");
+      }
+
+      pendingCount.textContent = pending.length === 1
+        ? "1 tarefa"
+        : pending.length + " tarefas";
+    }
+
+    function addTask(text, priority) {
+      tasks.unshift({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random(),
+        text: text.trim(),
+        priority: priority || "media",
+        completed: false,
+        createdAt: Date.now(),
+        completedAt: null
+      });
+      saveTasks();
+      render();
+    }
+
+    function toggleTask(id) {
+      tasks = tasks.map(task => {
+        if (task.id !== id) return task;
+        const completed = !task.completed;
+        return {
+          ...task,
+          completed,
+          completedAt: completed ? Date.now() : null
+        };
+      });
+
+      saveTasks();
+      render();
+    }
+
+    function startInlineEdit(id, main, actions) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      const originalContent = main.innerHTML;
+      const originalActions = actions.innerHTML;
+
+      main.innerHTML = "";
+      actions.innerHTML = "";
+
+      const row = document.createElement("div");
+      row.className = "edit-row";
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = task.text;
+      input.maxLength = 250;
+      input.setAttribute("aria-label", "Editar tarefa");
+
+      const save = document.createElement("button");
+      save.type = "button";
+      save.className = "icon-btn save-btn";
+      save.textContent = "Salvar";
+
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "icon-btn cancel-btn";
+      cancel.textContent = "Cancelar";
+
+      const saveEdit = () => {
+        const clean = input.value.trim();
+        if (!clean) {
+          input.focus();
+          return;
+        }
+
+        tasks = tasks.map(t => t.id === id ? { ...t, text: clean } : t);
+        saveTasks();
+        render();
+      };
+
+      save.addEventListener("click", saveEdit);
+      cancel.addEventListener("click", render);
+
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") saveEdit();
+        if (event.key === "Escape") render();
+      });
+
+      row.appendChild(input);
+      main.appendChild(row);
+
+      actions.appendChild(save);
+      actions.appendChild(cancel);
+
+      input.focus();
+      input.select();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(task => task.id !== id);
+      saveTasks();
+      render();
+    }
+
+    taskForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      addTask(text, priorityInput.value);
+      taskInput.value = "";
+      priorityInput.value = "alta";
+      taskInput.focus();
+    });
+
+    let clearHistoryConfirming = false;
+    let clearHistoryTimer = null;
+
+    clearCompleted.addEventListener("click", () => {
+      if (!clearHistoryConfirming) {
+        clearHistoryConfirming = true;
+        clearCompleted.textContent = "Clique novamente para confirmar";
+        clearCompleted.classList.add("confirming");
+
+        clearTimeout(clearHistoryTimer);
+        clearHistoryTimer = setTimeout(() => {
+          clearHistoryConfirming = false;
+          clearCompleted.textContent = "Limpar histórico";
+          clearCompleted.classList.remove("confirming");
+        }, 4000);
+
+        return;
+      }
+
+      clearTimeout(clearHistoryTimer);
+      tasks = tasks.filter(task => !task.completed);
+      clearHistoryConfirming = false;
+      clearCompleted.textContent = "Limpar histórico";
+      clearCompleted.classList.remove("confirming");
+      saveTasks();
+      render();
+    });
+
+    historyHeader.addEventListener("click", () => {
+      const hidden = historyContent.classList.toggle("hidden");
+      historyToggle.textContent = hidden ? "Mostrar" : "Ocultar";
+    });
+
+    render();
+  </script>
+</body>
+</html>
