@@ -230,6 +230,12 @@
       font-size: 14px;
     }
 
+    .edit-row select {
+      min-height: 40px;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
     .save-btn {
       background: var(--primary);
       color: white;
@@ -507,9 +513,6 @@
       const task = tasks.find(t => t.id === id);
       if (!task) return;
 
-      const originalContent = main.innerHTML;
-      const originalActions = actions.innerHTML;
-
       main.innerHTML = "";
       actions.innerHTML = "";
 
@@ -521,6 +524,24 @@
       input.value = task.text;
       input.maxLength = 250;
       input.setAttribute("aria-label", "Editar tarefa");
+
+      const prioritySelect = document.createElement("select");
+      prioritySelect.setAttribute("aria-label", "Editar prioridade");
+
+      const options = [
+        ["alta", "Prioridade alta"],
+        ["media", "Prioridade média"],
+        ["baixa", "Prioridade baixa"]
+      ];
+
+      options.forEach(([value, label]) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        prioritySelect.appendChild(option);
+      });
+
+      prioritySelect.value = task.priority || "media";
 
       const save = document.createElement("button");
       save.type = "button";
@@ -534,12 +555,22 @@
 
       const saveEdit = () => {
         const clean = input.value.trim();
+
         if (!clean) {
           input.focus();
           return;
         }
 
-        tasks = tasks.map(t => t.id === id ? { ...t, text: clean } : t);
+        tasks = tasks.map(t =>
+          t.id === id
+            ? {
+                ...t,
+                text: clean,
+                priority: prioritySelect.value
+              }
+            : t
+        );
+
         saveTasks();
         render();
       };
@@ -553,8 +584,9 @@
       });
 
       row.appendChild(input);
-      main.appendChild(row);
+      row.appendChild(prioritySelect);
 
+      main.appendChild(row);
       actions.appendChild(save);
       actions.appendChild(cancel);
 
